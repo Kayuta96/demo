@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Order Confirmation</h1>
+    <p>Thank you for your purchase! Your order details are below:</p>
+
+    <!-- Order Details Section -->
+    <div class="order-details">
+        <p><strong>Order Number:</strong> <span th:text="${order.orderNumber}">Order123</span></p>
+        <p><strong>Status:</strong> <span th:text="${order.status}">Processing</span></p>
+        <p><strong>Total Amount Paid:</strong> <span th:text="${order.getTotalPrice()}">0</span> USD</p>
+        <p><strong>Shipping Address:</strong> <span th:text="${order.shippingAddress}">123 Main St</span></p>
+    </div>
+
+    <!-- Order Items Table -->
+    <h2>Order Items</h2>
+    <div th:if="${order.items}">
+        <table class="order-items-table">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${order.items}">
+                <td th:text="${item.product.name}">Product Name</td>
+                <td th:text="${item.quantity}">1</td>
+                <td th:text="${item.product.price}">0.00</td>
+                <td th:text="${item.getTotalPrice()}">0.00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="nav-links">
+        <a th:href="@{/products}" class="button">Continue Shopping</a>
+        <a th:href="@{/orders/user/history}" class="button">View Order History</a>
+        <a th:href="@{/}" class="button">Return to Home</a>
+    </div>
+</div>
+</body>
+</html>

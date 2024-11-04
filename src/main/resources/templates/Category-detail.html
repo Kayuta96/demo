@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Category Details</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Category Details</h1>
+  </header>
+
+  <!-- Display error message if available -->
+  <div class="message-box">
+    <p th:if="${error}" class="error" th:text="${error}"></p>
+  </div>
+
+  <!-- Display category details -->
+  <section class="category-info">
+    <h2 th:text="${category.name}">Category Name</h2>
+    <p><strong>Description:</strong> <span th:text="${category.description}">Description text</span></p>
+  </section>
+
+  <!-- Update Category Form -->
+  <section class="form-section">
+    <h3>Edit Category</h3>
+    <form th:action="@{/categories/update/{id}(id=${category.id})}" method="post" class="form">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" th:value="${category.name}" required>
+
+      <label for="description">Description:</label>
+      <input type="text" id="description" name="description" th:value="${category.description}" required>
+
+      <button type="submit" class="button primary">Save Changes</button>
+    </form>
+  </section>
+
+  <!-- Navigation back to the category list -->
+  <div class="navigation">
+    <a th:href="@{/categories}" class="button">Back to Categories</a>
+  </div>
+</div>
+</body>
+</html>

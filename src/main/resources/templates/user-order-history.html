@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Order History</title>
+</head>
+<body>
+<h1>Your Order History</h1>
+<div th:if="${orders.isEmpty()}">
+  <p>You have no orders yet.</p>
+</div>
+<div th:each="order : ${orders}">
+  <h2>Order #<span th:text="${order.orderNumber}"></span></h2>
+  <p>Status: <span th:text="${order.status}"></span></p>
+  <p>Date: <span th:text="${order.orderDate}"></span></p>
+  <a th:href="@{/orders/user/{id}(id=${order.id})}">View Details</a>
+  <hr>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Categories</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Categories</h1>
+  </header>
+
+  <!-- Display success or error messages -->
+  <div class="message-box">
+    <p th:if="${message}" class="success" th:text="${message}"></p>
+    <p th:if="${error}" class="error" th:text="${error}"></p>
+  </div>
+
+  <!-- Category List -->
+  <section class="category-list">
+    <div th:each="category : ${categories}" class="category-card">
+      <h2 th:text="${category.name}">Category Name</h2>
+      <p th:text="${category.description}">Description</p>
+
+      <div class="category-actions">
+        <a th:href="@{/categories/{id}(id=${category.id})}" class="button">View Details</a>
+        <form th:action="@{/categories/delete/{id}(id=${category.id})}" method="post" class="delete-form">
+          <button type="submit" class="button danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pagination Controls -->
+  <div class="pagination">
+    <p>Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span></p>
+    <div class="pagination-controls">
+      <a th:if="${currentPage > 0}" th:href="@{/categories(page=${currentPage - 1})}" class="button">Previous</a>
+      <a th:if="${currentPage + 1 < totalPages}" th:href="@{/categories(page=${currentPage + 1})}" class="button">Next</a>
+    </div>
+  </div>
+
+  <!-- Create Category Form -->
+  <section class="form-section">
+    <h3>Create a New Category</h3>
+    <form th:action="@{/categories/create}" method="post" class="form">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="description">Description:</label>
+      <input type="text" id="description" name="description" required>
+
+      <button type="submit" class="button primary">Create Category</button>
+    </form>
+  </section>
+</div>
+</body>
+</html>

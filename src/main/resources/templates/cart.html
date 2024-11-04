@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Your Shopping Cart</h1>
+
+    <!-- Empty Cart Message -->
+    <div th:if="${cartItems.isEmpty()}">
+        <p>Your cart is empty. <a th:href="@{/products}">Continue shopping</a> to add items to your cart.</p>
+    </div>
+
+    <!-- Cart Items Table -->
+    <table th:if="${!cartItems.isEmpty()}" class="cart-table">
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price per Item</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${cartItems}">
+            <td th:text="${item.product.name}">Product Name</td>
+
+            <!-- Quantity with update form -->
+            <td>
+                <form th:action="@{/cart/update}" method="post" class="quantity-form">
+                    <input type="hidden" name="productId" th:value="${item.product.id}">
+                    <input type="number" name="quantity" th:value="${item.quantity}" min="1" class="quantity-input">
+                    <button type="submit" class="button update-button">Update</button>
+                </form>
+            </td>
+
+            <td th:text="${item.product.price}">0.00</td>
+            <td th:text="${item.getTotalPrice()}">0.00</td>
+
+            <!-- Remove Item -->
+            <td>
+                <form th:action="@{/cart/remove}" method="post">
+                    <input type="hidden" name="productId" th:value="${item.product.id}">
+                    <button type="submit" class="button danger">Remove</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Total Price and Checkout Button -->
+    <div th:if="${!cartItems.isEmpty()}" class="cart-summary">
+        <h3>Total Price: <span th:text="${total}">0.00</span> USD</h3>
+        <form th:action="@{/checkout}" method="post">
+            <button type="submit" class="button primary">Proceed to Checkout</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
