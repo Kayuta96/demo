@@ -1,6 +1,8 @@
 package com.webshop.demo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,12 +13,13 @@ public class Category {
     private Long id;
 
     @Column(nullable = false)
+    @NotEmpty(message = "Category name cannot be empty")
     private String name;
 
     private String description;
 
-    @OneToMany(mappedBy = "category")
-    private List<Product> products;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 
     public Category() {}
 
@@ -56,5 +59,17 @@ public class Category {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    // Helper method to add a product
+    public void addProduct(Product product) {
+        products.add(product);
+        product.setCategory(this);  // Set this category to the product
+    }
+
+    // Helper method to remove a product
+    public void removeProduct(Product product) {
+        products.remove(product);
+        product.setCategory(null);  // Unset the category from the product
     }
 }

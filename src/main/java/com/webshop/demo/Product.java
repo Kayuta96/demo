@@ -35,8 +35,8 @@ public class Product {
     public Product(String name, String description, int stockQuantity, BigDecimal price, Category category) {
         this.name = name;
         this.description = description;
-        this.stockQuantity = stockQuantity;
-        this.price = price;
+        setStockQuantity(stockQuantity);  // Ensure validation is applied
+        setPrice(price);  // Ensure validation is applied
         this.category = category;
     }
 

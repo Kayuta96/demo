@@ -29,15 +29,14 @@ public class CartItem {
     public CartItem(Product product, Cart cart, int quantity) {
         this.product = product;
         this.cart = cart;
-        this.quantity = quantity;
+        setQuantity(quantity); // Enforce validation in the constructor
     }
 
-    // Optional constructor for initializing with an order
     public CartItem(Product product, Cart cart, Order order, int quantity) {
         this.product = product;
         this.cart = cart;
         this.order = order;
-        this.quantity = quantity;
+        setQuantity(quantity); // Enforce validation here as well
     }
 
     public Long getId() {

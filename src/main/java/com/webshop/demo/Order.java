@@ -14,78 +14,51 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime orderDate;
+    private LocalDateTime orderDate = LocalDateTime.now();
+    private LocalDateTime statusUpdatedDate = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-
-    private LocalDateTime statusUpdatedDate;  // Track last status update
+    private OrderStatus status = OrderStatus.PENDING;
 
     private boolean paymentReceived;
-
     private String shippingAddress;
-
-    private String orderNumber;
-
+    private String orderNumber = UUID.randomUUID().toString();
     private boolean fulfilled;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)  // Link order to User
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items;
 
-    // Constructor
-    public Order() {
-        this.orderDate = LocalDateTime.now();
-        this.status = OrderStatus.PENDING;  // Default to PENDING when order is created
-        this.statusUpdatedDate = LocalDateTime.now();  // Initialize with current date/time
-        this.paymentReceived = false;
-        this.orderNumber = generateOrderNumber();
-        this.fulfilled = false;  // Default to not fulfilled
+    // Calculate the total price of all items in the order
+    public BigDecimal getTotalPrice() {
+        return items.stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Generate a unique order number using UUID
-    private String generateOrderNumber() {
-        return UUID.randomUUID().toString();
+    // Getters and Setters with validation
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+        this.statusUpdatedDate = LocalDateTime.now(); // Automatically update when status changes
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public LocalDateTime getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
     public OrderStatus getStatus() {
         return status;
     }
 
-    // Set order status and automatically update the statusUpdatedDate
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-        this.statusUpdatedDate = LocalDateTime.now();  // Update statusUpdatedDate each time status changes
-    }
-
     public LocalDateTime getStatusUpdatedDate() {
         return statusUpdatedDate;
-    }
-
-    // Add this setter method to allow setting the statusUpdatedDate externally
-    public void setStatusUpdatedDate(LocalDateTime statusUpdatedDate) {
-        this.statusUpdatedDate = statusUpdatedDate;
     }
 
     public boolean isPaymentReceived() {
@@ -123,7 +96,7 @@ public class Order {
     public void setItems(List<CartItem> items) {
         this.items = items;
         for (CartItem item : items) {
-            item.setOrder(this);  // Ensure each CartItem has a reference to this Order
+            item.setOrder(this);
         }
     }
 
@@ -133,12 +106,5 @@ public class Order {
 
     public void setFulfilled(boolean fulfilled) {
         this.fulfilled = fulfilled;
-    }
-
-    // Calculate the total price of all items in the order
-    public BigDecimal getTotalPrice() {
-        return items.stream()
-                .map(CartItem::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

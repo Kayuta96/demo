@@ -1,6 +1,8 @@
 package com.webshop.demo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})}) // Ensure email is unique
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class User implements UserDetails {
 
     @Id
@@ -19,12 +21,14 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @NotEmpty(message = "Username cannot be empty")
     private String username;
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, unique = true)
+    @Email(message = "Email should be valid")
     private String email;
 
     private String firstName;
@@ -51,13 +55,8 @@ public class User implements UserDetails {
     }
 
     // Getters and Setters
-
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -66,6 +65,7 @@ public class User implements UserDetails {
 
     public void setUsername(String username) {
         this.username = username;
+        this.authorities = null; // Reset authorities if username changes
     }
 
     public String getPassword() {
