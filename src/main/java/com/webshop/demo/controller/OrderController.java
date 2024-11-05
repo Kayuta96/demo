@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller  // Changed to @Controller
+@Controller
 @RequestMapping("/orders")
 public class OrderController {
 
@@ -22,47 +22,45 @@ public class OrderController {
     @Autowired
     private CartService cartService;
 
-    // Retrieve the authenticated user's order history
+    // Retrieve the authenticated user's order history and display it in a Thymeleaf view
     @GetMapping("/user/history")
     public String getUserOrderHistory(Model model) {
-        User user = cartService.getUser();  // Get the authenticated user
+        User user = cartService.getUser();
         List<Order> orders = orderService.getOrdersByUser(user);
-        model.addAttribute("orders", orders);  // Pass orders to the model for the view
-        return "user-order-history";  // Renders user-order-history.html
+        model.addAttribute("orders", orders);
+        return "order-history";  // Render order-history.html
     }
 
-    // Retrieve details of a specific order for the authenticated user
+    // Retrieve a specific order's details for the authenticated user
     @GetMapping("/user/{orderId}")
     public String getOrderDetails(@PathVariable Long orderId, Model model) {
         User user = cartService.getUser();
         Order order = orderService.getOrderByIdAndUser(orderId, user);
-        model.addAttribute("order", order);  // Pass the order to the model
-        return "order-details";  // Renders order-details.html
+        model.addAttribute("order", order);
+        return "order-details";  // Render order-details.html
     }
 
-    // Admin endpoint: Retrieve all orders
+    // Admin-only: Retrieve all orders and display them in a Thymeleaf view
     @GetMapping("/admin/all")
     public String getAllOrders(Model model) {
         List<Order> orders = orderService.getAllOrders();
-        model.addAttribute("orders", orders);  // Pass all orders to the model
-        return "admin-all-orders";  // Renders admin-all-orders.html
+        model.addAttribute("orders", orders);
+        return "admin-order-list";  // Render admin-order-list.html
     }
 
-    // Admin endpoint: Retrieve orders by status
+    // Admin-only: Retrieve orders by status and display in a Thymeleaf view
     @GetMapping("/admin/status")
     public String getOrdersByStatus(@RequestParam OrderStatus status, Model model) {
         List<Order> orders = orderService.getOrdersByStatus(status);
-        model.addAttribute("orders", orders);  // Pass filtered orders to the model
-        model.addAttribute("status", status);   // Include the status filter in the model
-        return "admin-orders-by-status";  // Renders admin-orders-by-status.html
+        model.addAttribute("orders", orders);
+        model.addAttribute("status", status);
+        return "admin-order-status";  // Render admin-order-status.html
     }
 
-    // Admin endpoint: Update the status of an order
+    // Admin-only: Update the status of an order
     @PostMapping("/admin/update-status")
-    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam OrderStatus status, Model model) {
-        Order updatedOrder = orderService.updateOrderStatus(orderId, status);
-        model.addAttribute("order", updatedOrder);
-        model.addAttribute("message", "Order status updated successfully.");
-        return "redirect:/orders/admin/all";  // Redirect to all orders page after update
+    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam OrderStatus status) {
+        orderService.updateOrderStatus(orderId, status);
+        return "redirect:/orders/admin/all";  // Redirect to admin order list after update
     }
 }

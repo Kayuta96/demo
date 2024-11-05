@@ -24,13 +24,11 @@ public class ProductService {
         return productRepository.findAll(pageable);
     }
 
-    // Search products by keyword in name or description, with pagination
+    // Search products by keyword with pagination
     public Page<Product> searchProducts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        if (keyword == null || keyword.isEmpty()) {
-            return productRepository.findAll(pageable);  // Return all products if no keyword is provided
-        }
-        return productRepository.searchByKeyword(keyword, pageable);  // Custom search query
+        return (keyword == null || keyword.isEmpty()) ?
+                productRepository.findAll(pageable) : productRepository.findByNameContaining(keyword, pageable);
     }
 
     // Filter products by category, price range, and rating with pagination
@@ -45,11 +43,6 @@ public class ProductService {
         return productRepository.findById(id).orElse(null);
     }
 
-    // Alternative method to retrieve product by ID, returns null if not found
-    public Product findProductById(Long productId) {
-        return productRepository.findById(productId).orElse(null);
-    }
-
     // Reduce stock quantity for a product if available
     public boolean reduceStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
@@ -59,9 +52,8 @@ public class ProductService {
             product.setStockQuantity(product.getStockQuantity() - quantity);
             productRepository.save(product);
             return true;
-        } else {
-            return false; // Not enough stock
         }
+        return false; // Not enough stock
     }
 
     // Save a new or updated product

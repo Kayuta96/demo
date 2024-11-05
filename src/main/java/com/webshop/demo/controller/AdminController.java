@@ -26,6 +26,6 @@ public class AdminController {
     public String addProduct(@ModelAttribute Product product, RedirectAttributes redirectAttributes) {
         productService.saveProduct(product);
         redirectAttributes.addFlashAttribute("successMessage", "Product added successfully.");
-        return "redirect:/admin/products";  // Redirect to an admin-specific products page if it exists
+        return "redirect:/admin/products"; // Redirect to an admin-specific products page if it exists
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 public class Cart {
@@ -18,32 +19,27 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
 
-    // Add product to cart
+    // Add product to cart or update existing quantity
     public void addItem(Product product, int quantity) {
-        for (CartItem item : items) {
-            if (item.getProduct().getId().equals(product.getId())) {
-                item.setQuantity(item.getQuantity() + quantity);
-                return;
-            }
+        Optional<CartItem> existingItem = items.stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            item.setQuantity(item.getQuantity() + quantity);
+        } else {
+            CartItem newItem = new CartItem(product, this, quantity);
+            items.add(newItem);
         }
-        CartItem newItem = new CartItem();
-        newItem.setProduct(product);
-        newItem.setQuantity(quantity);
-        newItem.setCart(this); // Set the relationship back to this cart
-        items.add(newItem);
     }
 
-    // Remove product from cart
+    // Remove product from cart by product ID
     public void removeItem(Long productId) {
         items.removeIf(item -> item.getProduct().getId().equals(productId));
     }
 
-    // Retrieve all items in the cart
-    public List<CartItem> getItems() {
-        return items;
-    }
-
-    // Calculate total price
+    // Calculate the total price of all items in the cart
     public BigDecimal getTotalPrice() {
         return items.stream()
                 .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
@@ -55,23 +51,18 @@ public class Cart {
         items.clear();
     }
 
-    // Update quantity for a specific product
+    // Update quantity for a specific product if non-negative
     public void updateItemQuantity(Long productId, int newQuantity) {
-        for (CartItem item : items) {
-            if (item.getProduct().getId().equals(productId)) {
-                item.setQuantity(newQuantity);
-                break;
-            }
-        }
+        if (newQuantity < 0) throw new IllegalArgumentException("Quantity cannot be negative");
+
+        items.stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .ifPresent(item -> item.setQuantity(newQuantity));
     }
 
-    // Getters and Setters for ID and User
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public User getUser() {
@@ -80,6 +71,10 @@ public class Cart {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<CartItem> getItems() {
+        return items;
     }
 
     public void setItems(List<CartItem> items) {

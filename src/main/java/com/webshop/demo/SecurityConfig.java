@@ -15,24 +15,24 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Restrict admin access
-                        .requestMatchers("/register", "/login", "/", "/css/**", "/js/**").permitAll()  // Public access pages
-                        .requestMatchers("/products/**").permitAll()  // Public access to product pages
+                        .requestMatchers("/admin/**").hasRole("ADMIN")           // Restrict admin access
+                        .requestMatchers("/register", "/login", "/", "/css/**", "/js/**").permitAll()  // Allow public access
+                        .requestMatchers("/products/**").permitAll()            // Public access to products
                         .requestMatchers("/cart/**", "/checkout/**").authenticated()  // Require login for cart and checkout
-                        .anyRequest().authenticated()  // Authenticated access for all other pages
+                        .anyRequest().authenticated()                           // Authenticate all other requests
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")  // Custom login page
-                        .defaultSuccessUrl("/", true)  // Redirect to home page on successful login
-                        .permitAll()  // Allow access to login page for all users
+                        .loginPage("/login")                                    // Custom login page
+                        .defaultSuccessUrl("/", true)                           // Redirect to home page on successful login
+                        .permitAll()                                            // Allow everyone to access login
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")  // Redirect to login with logout message
-                        .permitAll()  // Allow logout access to all users
+                        .logoutSuccessUrl("/login?logout")                      // Redirect to login with logout message
+                        .permitAll()                                            // Allow everyone to access logout
                 )
-                .csrf(csrf -> csrf  // Enable CSRF protection for security
-                        .ignoringRequestMatchers("/api/**")  // Optional: Disable CSRF for specific APIs if needed
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/checkout/**", "/api/**")     // Disable CSRF for specific routes if needed
                 );
 
         return http.build();
@@ -43,3 +43,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+

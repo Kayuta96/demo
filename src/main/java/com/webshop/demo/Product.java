@@ -13,25 +13,18 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty(message = "Produktnamnet får inte vara tomt")
+    @NotEmpty(message = "Product name cannot be empty")
     private String name;
 
     private String description;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "Stock quantity must be zero or greater")
     private int stockQuantity;
 
-    @NotNull(message = "Priset får inte vara tomt")
-    @Min(value = 0, message = "Priset måste vara ett positivt tal")
+    @NotNull(message = "Price cannot be null")
+    @Min(value = 0, message = "Price must be a positive number")
     private BigDecimal price;
-
-    @Min(value = 0, message = "Lagret måste vara minst 0")
-    private int stock;
-
-    // New field: average rating
-    @Min(value = 0, message = "Betyget måste vara minst 0")
-    @Column(nullable = false)
-    private double rating;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -39,14 +32,17 @@ public class Product {
 
     public Product() {}
 
-    // Getters and Setters
-
-    public Long getId() {
-        return id;
+    public Product(String name, String description, int stockQuantity, BigDecimal price, Category category) {
+        this.name = name;
+        this.description = description;
+        this.stockQuantity = stockQuantity;
+        this.price = price;
+        this.category = category;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    // Getters and Setters
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -57,14 +53,6 @@ public class Product {
         this.name = name;
     }
 
-    public int getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -73,28 +61,22 @@ public class Product {
         this.description = description;
     }
 
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+        if (stockQuantity < 0) throw new IllegalArgumentException("Stock quantity cannot be negative");
+        this.stockQuantity = stockQuantity;
+    }
+
     public BigDecimal getPrice() {
         return price;
     }
 
     public void setPrice(BigDecimal price) {
+        if (price.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Price cannot be negative");
         this.price = price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
     }
 
     public Category getCategory() {

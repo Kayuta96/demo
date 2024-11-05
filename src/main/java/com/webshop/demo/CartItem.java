@@ -24,44 +24,32 @@ public class CartItem {
 
     private int quantity;
 
-    // Default constructor
-    public CartItem() {
-    }
+    public CartItem() {}
 
-    // Parameterized constructor
     public CartItem(Product product, Cart cart, int quantity) {
         this.product = product;
         this.cart = cart;
         this.quantity = quantity;
     }
 
-    // Getters and Setters
+    // Optional constructor for initializing with an order
+    public CartItem(Product product, Cart cart, Order order, int quantity) {
+        this.product = product;
+        this.cart = cart;
+        this.order = order;
+        this.quantity = quantity;
+    }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Product getProduct() {
         return product;
     }
 
-    public void setProduct(Product product) {
-        if (product == null) {
-            throw new IllegalArgumentException("Product cannot be null");
-        }
-        this.product = product;
-    }
-
     public Cart getCart() {
         return cart;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
     }
 
     public Order getOrder() {
@@ -83,7 +71,6 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    // Calculate total price for this CartItem
     public BigDecimal getTotalPrice() {
         return product.getPrice().multiply(BigDecimal.valueOf(quantity));
     }

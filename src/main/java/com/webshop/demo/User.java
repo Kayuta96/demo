@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})}) // Ensure email is unique
 public class User implements UserDetails {
 
     @Id
@@ -31,7 +31,6 @@ public class User implements UserDetails {
     private String lastName;
     private String phoneNumber;
 
-    // Many-to-Many relation for roles
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_roles",
@@ -40,9 +39,8 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // One-to-Many relation for orders
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Order> orders;
+    // Cache authorities to avoid recalculating every time
+    private transient Collection<? extends GrantedAuthority> authorities;
 
     public User() {}
 
@@ -52,7 +50,8 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    // ID Getter and Setter
+    // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -61,7 +60,6 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    // Username, Password, Email Getters and Setters
     public String getUsername() {
         return username;
     }
@@ -86,7 +84,6 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    // Profile Information Getters and Setters
     public String getFirstName() {
         return firstName;
     }
@@ -111,34 +108,33 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
     }
 
-    // Roles Getters, Setters, and Helper Methods
     public Set<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+        this.authorities = null; // Reset cached authorities if roles change
     }
 
     public void addRole(Role role) {
         this.roles.add(role);
+        this.authorities = null; // Reset cached authorities
     }
 
-    // Orders Getter and Setter
-    public List<Order> getOrders() {
-        return orders;
+    // Helper method to check if user has a specific role
+    public boolean hasRole(String roleName) {
+        return roles.stream().anyMatch(role -> role.getName().equals(roleName));
     }
 
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
-
-    // UserDetails methods for Spring Security
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) role::getName)
-                .collect(Collectors.toSet());
+        if (this.authorities == null) {
+            this.authorities = roles.stream()
+                    .map(role -> (GrantedAuthority) role::getName)
+                    .collect(Collectors.toSet());
+        }
+        return this.authorities;
     }
 
     @Override

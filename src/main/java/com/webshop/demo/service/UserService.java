@@ -9,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import jakarta.annotation.PostConstruct;
 
 @Service
@@ -24,56 +23,46 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Initialize the ROLE_USER role if it doesn't already exist
+    // Initialize default roles
     @PostConstruct
     public void initRoles() {
-        if (roleRepository.findByName("ROLE_USER") == null) {
-            Role userRole = new Role();
-            userRole.setName("ROLE_USER");
-            roleRepository.save(userRole);
-        }
+        roleRepository.findByName("ROLE_USER").orElseGet(() -> {
+            Role userRole = new Role("ROLE_USER");
+            return roleRepository.save(userRole);
+        });
     }
 
-    // Register a new user and assign the default ROLE_USER
+    // Register a new user with default ROLE_USER
     public void registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Encrypt the password
-
-        // Assign the default role ROLE_USER
-        Role userRole = roleRepository.findByName("ROLE_USER");
-        if (userRole != null) {
-            user.addRole(userRole);
-        }
-
-        userRepository.save(user);  // Save the user in the database
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        roleRepository.findByName("ROLE_USER").ifPresent(user::addRole);
+        userRepository.save(user);
     }
 
-    // Save a user (used for managing existing users or roles)
+    // Save or update a user with encrypted password
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
-    // Retrieve the currently authenticated user
+    // Retrieve authenticated user from security context
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
             String username = ((org.springframework.security.core.userdetails.User) authentication.getPrincipal()).getUsername();
-            return userRepository.findByUsername(username);
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalStateException("User not found"));
         }
         throw new IllegalStateException("User not authenticated");
     }
 
-    // Update user profile information
+    // Update profile information of the authenticated user
     public User updateUserProfile(User updatedUser) {
         User user = getAuthenticatedUser();
-
-        // Update profile fields
         user.setFirstName(updatedUser.getFirstName());
         user.setLastName(updatedUser.getLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
-
-        // Save updated user profile in the database
         return userRepository.save(user);
     }
 }
